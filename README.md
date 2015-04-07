@@ -21,5 +21,5 @@ Text is parsed in `MDToLatex.py`. It's mostly what you would expect. I tried to 
 
 ## TODO
 
-- Markdown style formatting for _italicized_ and *bolded* body text instead of LaTeX formatting.
+- Markdown style formatting for _italicized_ and **bolded** body text instead of LaTeX formatting.
 - Clean up `MDToLatexTemplates.py`

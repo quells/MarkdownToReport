@@ -18,3 +18,8 @@ Text is parsed in `MDToLatex.py`. It's mostly what you would expect. I tried to 
 
 - Python 2.7 
 - pdflatex (or equivalent LaTeX to PDF program)
+
+## TODO
+
+- Markdown style formatting for _italicized_ and *bolded* body text instead of LaTeX formatting.
+- Clean up `MDToLatexTemplates.py`

@@ -1,8 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-def BuildDocument(doctype):
-	return '''\documentclass[11pt, oneside]{%s} 
+def BuildDocument():
+	return '''\documentclass[11pt, oneside]{article} 
 \usepackage[margin=1in]{geometry} \geometry{letterpaper} 
 \usepackage{setspace}
 \usepackage[font=singlespacing,labelfont=bf]{caption}
@@ -19,7 +19,7 @@ def BuildDocument(doctype):
 \let\Oldincludegraphics\includegraphics
 \\renewcommand{\includegraphics}[1]{\Oldincludegraphics[width=\maxwidth]{#1}}
 
-'''%(doctype)
+'''
 
 def BuildTable(caption, alignments, headers, rows, label):
 	latex = '''\\begin{table}[H]
@@ -65,7 +65,11 @@ def BuildAuthor(author):
 	return latex
 
 def BeginDocument(doctype):
-	latex = '\\date{}\n\n\\hyphenpenalty=100000\n\n\\begin{document}\n\n'
+	if doctype == 'report':
+		latex = '\\date{}\n\n'
+	else:
+		latex = '\n\n'
+	latex += '\\hyphenpenalty=100000\n\n\\begin{document}\n\n'
 	latex += '\\pagenumbering{gobble}\n' if doctype == 'article' else ''
 	latex += '\\maketitle\n'
 	return latex

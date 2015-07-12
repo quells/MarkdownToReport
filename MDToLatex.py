@@ -14,7 +14,7 @@ if len(sys.argv) > 1:
 	try:
 		doctype = sys.argv[2]
 	except IndexError:
-		doctype = 'article'
+		doctype = 'report'
 else:
 	print 'No file provided.'
 	sys.exit()
@@ -87,7 +87,7 @@ def ConvertFigure(text):
 		return Templates.BuildFigure(file, caption, label)
 	return text
 
-latex = Templates.BuildDocument(doctype)
+latex = Templates.BuildDocument()
 for i in range(len(blocks)):
 	b = blocks[i]
 	if i == 0:
@@ -113,7 +113,10 @@ for i in range(len(blocks)):
 			abstract = metadata.get('abstract', None)
 			latex += Templates.BuildAbstract(abstract)
 			
-			latex += '\\newpage\n\\doublespacing\n\\pagenumbering{arabic}\n\n' if doctype == 'article' else '\n'
+			if doctype == 'report':
+				latex += '\\newpage\n\\doublespacing\n\\pagenumbering{arabic}\n\n'
+			else:
+				latex += '\\pagenumbering{arabic}\n'
 			continue
 	functions = [ConvertHeader, ConvertFigure, ConvertTable]
 	c = [f(b) for f in functions if f(b) != b]

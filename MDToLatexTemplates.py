@@ -1,8 +1,10 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-def BuildDocument():
-	return '''\documentclass[11pt, oneside]{article} 
+def BuildDocument(doctype):
+	if doctype == 'report':
+		doctype = 'article'
+	return '''\documentclass[11pt, oneside]{%s} 
 \usepackage[margin=1in]{geometry} \geometry{letterpaper} 
 \usepackage{setspace}
 \usepackage[font=singlespacing,labelfont=bf]{caption}
@@ -19,7 +21,7 @@ def BuildDocument():
 \let\Oldincludegraphics\includegraphics
 \\renewcommand{\includegraphics}[1]{\Oldincludegraphics[width=\maxwidth]{#1}}
 
-'''
+'''%(doctype)
 
 def BuildTable(caption, alignments, headers, rows, label):
 	latex = '''\\begin{table}[H]
@@ -65,12 +67,9 @@ def BuildAuthor(author):
 	return latex
 
 def BeginDocument(doctype):
+	latex = '\\date{}\n\n\\hyphenpenalty=100000\n\n\\begin{document}\n\n'
 	if doctype == 'report':
-		latex = '\\date{}\n\n'
-	else:
-		latex = '\n\n'
-	latex += '\\hyphenpenalty=100000\n\n\\begin{document}\n\n'
-	latex += '\\pagenumbering{gobble}\n' if doctype == 'article' else ''
+		latex += '\\pagenumbering{gobble}\n'
 	latex += '\\maketitle\n'
 	return latex
 
@@ -98,3 +97,10 @@ def BuildThanks(thanks):
 def BuildAbstract(abstract):
 	return '\\begin{noindent}\n\\textbf{%s}\n\\end{noindent}\n\n'%(abstract) if abstract != None else ''
 
+def BuildList(kind, items):
+	kind = 'enumerate' if kind == 'ordered' else 'itemize'
+	latex = '\\begin{%s}\n'%(kind)
+	for i in items:
+		latex += '\t\\item %s'%(i)
+	latex += '\\end{%s}\n'%(kind)
+	return latex

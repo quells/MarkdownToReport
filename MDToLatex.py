@@ -9,20 +9,6 @@ import subprocess
 def match(string, regex):
 	return True if re.match(re.compile(regex), string) else False
 
-if len(sys.argv) > 1:
-	filename = sys.argv[1]
-	try:
-		doctype = sys.argv[2]
-	except IndexError:
-		doctype = 'report'
-else:
-	print 'No file provided.'
-	sys.exit()
-
-with open(filename) as file:
-	text = file.read()
-	blocks = text.split('\n\n')
-
 def ConvertMetadata(text):
 	metadata_regex = r'^---\n(.*\n)+---$'
 	if match(text, metadata_regex):
@@ -87,40 +73,73 @@ def ConvertFigure(text):
 		return Templates.BuildFigure(file, caption, label)
 	return text
 
-latex = Templates.BuildDocument()
-for i in range(len(blocks)):
-	b = blocks[i]
-	if i == 0:
-		metadata = ConvertMetadata(b)
-		if metadata != b:
-			title = metadata.get('title', None)
-			subtitle = metadata.get('subtitle', None)
-			latex += Templates.BuildTitle(title, subtitle)
-			
-			author = metadata.get('author', None)
-			latex += Templates.BuildAuthor(author)
-			
-			latex += Templates.BeginDocument(doctype)
-			
-			Class = metadata.get('class', None)
-			due = metadata.get('due', None)
-			received = metadata.get('received', None)
-			latex += Templates.BuildInfoTable(Class, due, received)
-			
-			thanks = metadata.get('thanks', None)
-			latex += Templates.BuildThanks(thanks)
-			
-			abstract = metadata.get('abstract', None)
-			latex += Templates.BuildAbstract(abstract)
-			
-			if doctype == 'report':
-				latex += '\\newpage\n\\doublespacing\n\\pagenumbering{arabic}\n\n'
-			else:
-				latex += '\\pagenumbering{arabic}\n'
-			continue
-	functions = [ConvertHeader, ConvertFigure, ConvertTable]
-	c = [f(b) for f in functions if f(b) != b]
-	latex += c[0] if len(c) > 0 else b
-	latex += '\n\n'
-latex += '\\end{document}'
-print latex
+def ConvertList(text):
+	ol_regex = r'(^\d+\. .+\n)+'
+	if match(text, ol_regex):
+		lines = text.split('\n')
+		items = ['. '.join(l.split('. ')[1:]) for l in lines]
+		return Templates.BuildList('ordered', items)
+	
+	ul_regex = r'(^- .+\n)+'
+	if match(text, ul_regex):
+		lines = text.split('\n')
+		items = [l[2:] for l in lines]
+		return Templates.BuildList('unordered', items)
+	
+	return text
+
+if __name__ == '__main__':
+	if len(sys.argv) > 1:
+		filename = sys.argv[1]
+		try:
+			doctype = sys.argv[2]
+		except IndexError:
+			doctype = 'report'
+	else:
+		print 'No file provided.'
+		sys.exit()
+
+	with open(filename) as file:
+		text = file.read()
+		blocks = text.split('\n\n')
+	
+	latex = Templates.BuildDocument(doctype)
+	for i in range(len(blocks)):
+		b = blocks[i]
+		if i == 0:
+			metadata = ConvertMetadata(b)
+			if metadata != b:
+				title = metadata.get('title', None)
+				subtitle = metadata.get('subtitle', None)
+				latex += Templates.BuildTitle(title, subtitle)
+				
+				author = metadata.get('author', None)
+				latex += Templates.BuildAuthor(author)
+				
+				latex += Templates.BeginDocument(doctype)
+				
+				Class = metadata.get('class', None)
+				due = metadata.get('due', None)
+				received = metadata.get('received', None)
+				latex += Templates.BuildInfoTable(Class, due, received)
+				
+				thanks = metadata.get('thanks', None)
+				latex += Templates.BuildThanks(thanks)
+				
+				abstract = metadata.get('abstract', None)
+				latex += Templates.BuildAbstract(abstract)
+				
+				if doctype == 'report':
+					latex += '\\newpage\n\\doublespacing\n'
+				elif doctype == 'article':
+					pass
+				
+				latex += '\\pagenumbering{arabic}\n\n'
+				
+				continue
+		functions = [ConvertHeader, ConvertFigure, ConvertTable, ConvertList]
+		c = [f(b) for f in functions if f(b) != b]
+		latex += c[0] if len(c) > 0 else b
+		latex += '\n\n'
+	latex += '\\end{document}'
+	print latex
